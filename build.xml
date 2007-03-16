@@ -23,7 +23,13 @@
 
     <target name="dist" depends="compile">
         <mkdir dir="${dist}/lib"/>
-        <jar jarfile="${dist}/lib/growllistener.jar" basedir="${build}"/>
+        <jar jarfile="${dist}/lib/growllistener.jar">
+            <fileset dir="${build}"/>
+            <fileset dir="${basedir}">
+                <include name="LICENSE"/>
+                <include name="README"/>
+            </fileset>
+        </jar>
     </target>
 
     <target name="clean">
