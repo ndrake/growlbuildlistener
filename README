@@ -2,8 +2,7 @@
 
 = Introduction =
 
-This is an Ant BuildListener that will display build notifications via Growl/JGrowl.
-
+This package contains a custom BuildListener and Task that display messages via Growl/JGrowl.
 
 = Prerequisites = 
 
@@ -15,22 +14,32 @@ This is an Ant BuildListener that will display build notifications via Growl/JGr
 
 = Details =
 
-Setting things up in Mac OS with Growl:
+== Setting things up in Mac OS with Growl ==
 
   * Make sure the following settings are enabled in Growl's Network preferences:
     * "Listen for incoming notifications"
     * "Allow remote application registration"
   * Put growllistener.jar into Ant's lib directory
   * Put binaryblizzard.jar (From JGrowl) into Ant's lib directory
-  * To make ant use the new listener, invoke ant like this:
-    * ant -listener net.slimeslurp.growl.GrowlListner
-    * You could also add "-listener net.slimeslurp.growl.GrowlListener" to your ANT_OPTS environment variable
-
-Setting things up in Linux with JGrowl:
+    
+== Setting things up in Linux with JGrowl ==
 
   * Startup JGrowl
   * Put growllistener.jar into Ant's lib directory
   * Put binaryblizzard.jar (From JGrowl) into Ant's lib directory
+
+
+== Using the Growl BuildListener ==
+
   * To make ant use the new listener, invoke ant like this:
     * ant -listener net.slimeslurp.growl.GrowlListner
     * You could also add "-listener net.slimeslurp.growl.GrowlListener" to your ANT_OPTS environment variable
+
+== Using the GrowlEcho task ==
+
+  * Add a taskdef to your build like this:
+
+    {{{ <taskdef name="growl" classname="net.slimeslurp.growl.GrowlEcho"/> }}}
+
+  * Use the task like this:
+    {{{ <growl message="The message"/> }}}
