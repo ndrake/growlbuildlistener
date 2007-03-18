@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <!DOCTYPE project>
 <project name="GrowlListener" default="dist" basedir=".">
+    <property environment="env"/>
     <property name="src" value="src"/>
     <property name="build" value="build"/>
     <property name="dist" value="dist"/>
     <property name="lib" value="lib"/>
-    <property name="ant.jar" value="/usr/local/java/apache-ant-1.6.5/lib/ant.jar"/>
+    <property name="ant.jar" value="${env.ANT_HOME}/lib/ant.jar"/>
 
     <path id="compile.classpath" >
         <fileset dir="${lib}" includes="*.jar"/>        
@@ -46,4 +47,10 @@
             </classpath>
         </java>
     </target>
+
+    <target name="test.echo" depends="dist">
+        <taskdef name="growl" classname="net.slimeslurp.growl.GrowlEcho"/>
+	<growl>test</growl>
+    </target>
+
 </project>
