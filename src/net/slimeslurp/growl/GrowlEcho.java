@@ -43,8 +43,11 @@ public class GrowlEcho extends Task {
     private static final String GROWL_PASSWD = null;
     private Growl growl;
 
-
+    /** The message to display */
     protected String message = "";
+
+    /** Indicates if the notification should be "sticky" */
+    protected boolean sticky = false;
 
     public GrowlEcho() {
         try {
@@ -73,7 +76,7 @@ public class GrowlEcho extends Task {
                                                          APP_NAME, 
                                                          message, 
                                                          APP_NAME, 
-                                                         false, 
+                                                         sticky, 
                                                          GrowlNotification.NORMAL));
         } catch(GrowlException e) {
             
@@ -101,4 +104,12 @@ public class GrowlEcho extends Task {
         message += getProject().replaceProperties(msg);
     }
 
+    /**
+     * Set the sticky value.
+     *
+     * @param sticky If true, Growl message will be "sticky"
+     */
+    public void setSticky(boolean sticky) {
+        this.sticky = sticky;
+    }
 }

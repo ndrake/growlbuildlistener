@@ -17,12 +17,12 @@
         <mkdir dir="${build}"/>
     </target>
 
-    <target name="compile" depends="init"> 
+    <target name="compile" depends="init" description="Compile the code"> 
         <javac srcdir="${src}" destdir="${build}" 
                classpathref="compile.classpath"/>
     </target>
 
-    <target name="dist" depends="compile">
+    <target name="dist" depends="compile" description="Build a jar">
         <mkdir dir="${dist}/lib"/>
         <jar jarfile="${dist}/lib/growllistener.jar">
             <fileset dir="${build}"/>
@@ -33,12 +33,12 @@
         </jar>
     </target>
 
-    <target name="clean">
+    <target name="clean" description="Clean up">
         <delete dir="${build}"/>
         <delete dir="${dist}"/>
     </target>
 
-    <target name="test" depends="dist">
+    <target name="test" depends="dist" description="Test GrowlListener">
         <java classname="net.slimeslurp.growl.GrowlListener">
             <classpath>
                 <path refid="compile.classpath"/>
@@ -48,9 +48,10 @@
         </java>
     </target>
 
-    <target name="test.echo" depends="dist">
+    <target name="test.echo" depends="dist" description="Test GrowlEcho task">
         <taskdef name="growl" classname="net.slimeslurp.growl.GrowlEcho"/>
-	<growl>test</growl>
+        <growl message="regular"/>
+        <growl message="sticky..." sticky="true"/>
     </target>
 
 </project>
