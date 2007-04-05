@@ -16,6 +16,8 @@
 
 package net.slimeslurp.growl;
 
+import java.util.Hashtable;
+
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.BuildEvent;
 
@@ -42,6 +44,8 @@ public class GrowlListener implements BuildListener {
     private static final String GROWL_PASSWD = null;
     private Growl growl;
 
+    private static final String FINISHED_STICKY_NAME = "gbl.endsticky";
+
     public GrowlListener() {
         try {
 
@@ -63,7 +67,7 @@ public class GrowlListener implements BuildListener {
      */
     public void buildStarted(BuildEvent event) {
         sendMessage("Build starting...",
-                    GrowlNotification.NORMAL);
+                    GrowlNotification.NORMAL, false);
     }
 
     /**
@@ -74,13 +78,21 @@ public class GrowlListener implements BuildListener {
     public void buildFinished(BuildEvent event) {
         Throwable t = event.getException();
         String projectName = event.getProject().getName();
+        Hashtable props = event.getProject().getProperties();
+        boolean sticky = false;
+
+        // Check if this message should be sticky or not
+        if(props != null && props.containsKey(FINISHED_STICKY_NAME)) {
+            sticky = Boolean.parseBoolean((String)props.get(FINISHED_STICKY_NAME));
+        } 
+
         if (t != null) {
             sendMessage("Build failed: " + t.toString(), 
-                        GrowlNotification.HIGH);
+                        GrowlNotification.HIGH, sticky);
             return;
         }
         sendMessage("Build finished for " + projectName, 
-                    GrowlNotification.NORMAL);
+                    GrowlNotification.NORMAL, sticky);
     }
 
     // Other messages are currently ignored
@@ -96,14 +108,15 @@ public class GrowlListener implements BuildListener {
      *
      * @param msg The message
      * @param priority The message priority
+     * @param sticky If true, notification should be "sticky"
      */
-    protected void sendMessage(String msg, int priority) {
+    protected void sendMessage(String msg, int priority, boolean sticky) {
         try {
             growl.sendNotification(new GrowlNotification(APP_NAME, 
                                                          APP_NAME, 
                                                          msg, 
                                                          APP_NAME, 
-                                                         false, 
+                                                         sticky, 
                                                          priority));
         } catch(GrowlException e) {
             e.printStackTrace();
@@ -112,6 +125,6 @@ public class GrowlListener implements BuildListener {
 
     public static void main(String[] args) {
         GrowlListener gl = new GrowlListener();
-        gl.sendMessage("Testing Testing", GrowlNotification.NORMAL);
+        gl.sendMessage("Testing Testing", GrowlNotification.NORMAL, false);
     }
 }
