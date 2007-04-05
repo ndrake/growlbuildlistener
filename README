@@ -34,6 +34,7 @@ This package contains a custom BuildListener and Task that display messages via 
   * To make ant use the new listener, invoke ant like this:
     * ant -listener net.slimeslurp.growl.GrowlListner
     * You could also add "-listener net.slimeslurp.growl.GrowlListener" to your ANT_OPTS environment variable
+  * If you set a property called {{{ gbl.endsticky }}} in your build file, the Build Finished notification will be "sticky"
 
 == Using the GrowlEcho task ==
 
@@ -43,3 +44,5 @@ This package contains a custom BuildListener and Task that display messages via 
 
   * Use the task like this:
     {{{ <growl message="The message"/> }}}
+
+  * GrowlEcho now support accepts a sticky attribute which, when set, will cause the notification to be "sticky"
