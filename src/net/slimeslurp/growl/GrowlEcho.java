@@ -39,8 +39,9 @@ import com.binaryblizzard.growl.GrowlRegistrations;
 public class GrowlEcho extends Task {
 
     private static final String APP_NAME = "Ant";
-    private static final String GROWL_HOST = "localhost";
-    private static final String GROWL_PASSWD = null;
+    private static final String DEFAULT_GROWL_HOST = "localhost";
+    private static final String DEFAULT_GROWL_PASSWD = null;
+    
     private Growl growl;
 
     /** The message to display */
@@ -48,14 +49,33 @@ public class GrowlEcho extends Task {
 
     /** Indicates if the notification should be "sticky" */
     protected boolean sticky = false;
-
+    
+    /** Name of system property */
+    private static final String GROWL_HOST_PROP = "gbl.host";
+    
+    /** Name of system property */
+    private static final String GROWL_PASSWD_PROP = "gbl.passwd";    
+    
+    /** The growl host to send messages to */
+    private String growlHost;
+    
+    /** The password for network notifications */
+    private String growlPasswd;
+    
     public GrowlEcho() {
         try {
+
+            // Have to get these from the system properties as the build properties aren't  
+            // available in buildStarted()
+            //
+            // These must be set via the ANT_OPTS env variable       
+            growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
+            growlPasswd = System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
 
             // Register with Growl/JGrowl
             growl = new Growl();
 
-            growl.addGrowlHost(GROWL_HOST, GROWL_PASSWD);
+            growl.addGrowlHost(growlHost, growlPasswd);
             GrowlRegistrations registrations = growl.getRegistrations(APP_NAME);
             registrations.registerNotification(APP_NAME, true);
         } catch(GrowlException e) {
@@ -112,4 +132,5 @@ public class GrowlEcho extends Task {
     public void setSticky(boolean sticky) {
         this.sticky = sticky;
     }
+      
 }

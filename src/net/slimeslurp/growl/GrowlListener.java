@@ -40,21 +40,30 @@ import com.binaryblizzard.growl.GrowlRegistrations;
 public class GrowlListener implements BuildListener {
 
     private static final String APP_NAME = "Ant";
-    private static final String GROWL_HOST = "localhost";
-    private static final String GROWL_PASSWD = null;
+    private static final String DEFAULT_GROWL_HOST = "localhost";
+    private static final String DEFAULT_GROWL_PASSWD = null;
     private Growl growl;
 
     private static final String FINISHED_STICKY_NAME = "gbl.endsticky";
-
+    private static final String GROWL_HOST_PROP = "gbl.host";
+    private static final String GROWL_PASSWD_PROP = "gbl.passwd";    
+    private String growlHost;
+    private String growlPasswd;
+    
     public GrowlListener() {
         try {
 
+            // Have to get these from the system properties as the build properties aren't  
+            // available in buildStarted()
+            //
+            // These must be set via the ANT_OPTS env variable       
+            growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
+            growlPasswd= System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
+
             // Register with Growl/JGrowl
             growl = new Growl();
-
-            growl.addGrowlHost(GROWL_HOST, GROWL_PASSWD);
+            growl.addGrowlHost(growlHost, growlPasswd);
             GrowlRegistrations registrations = growl.getRegistrations(APP_NAME);
-            registrations.registerNotification(APP_NAME, true);
         } catch(GrowlException e) {
             e.printStackTrace();
         }
@@ -65,7 +74,7 @@ public class GrowlListener implements BuildListener {
      *
      * @param event
      */
-    public void buildStarted(BuildEvent event) {
+    public void buildStarted(BuildEvent event) {        
         sendMessage("Build starting...",
                     GrowlNotification.NORMAL, false);
     }

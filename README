@@ -46,3 +46,7 @@ This package contains a custom BuildListener and Task that display messages via 
     {{{ <growl message="The message"/> }}}
 
   * GrowlEcho now support accepts a sticky attribute which, when set, will cause the notification to be "sticky"
+  
+== Changing the growl host ==
+
+By default, growl messages are sent to localhost.  You can tweak this by adding "-Dgbl.host=<some_ip>" to your ANT_OPTS environment variable.  You can also specify the growl password via ANT_OPTS using the gbl.passwd property.
