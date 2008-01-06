@@ -59,11 +59,12 @@ public class GrowlListener implements BuildListener {
             // These must be set via the ANT_OPTS env variable       
             growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
             growlPasswd= System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
-
+        
             // Register with Growl/JGrowl
             growl = new Growl();
             growl.addGrowlHost(growlHost, growlPasswd);
             GrowlRegistrations registrations = growl.getRegistrations(APP_NAME);
+            registrations.registerNotification(APP_NAME, true);
         } catch(GrowlException e) {
             e.printStackTrace();
         }

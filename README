@@ -32,7 +32,7 @@ This package contains a custom BuildListener and Task that display messages via 
 == Using the Growl BuildListener ==
 
   * To make ant use the new listener, invoke ant like this:
-    * ant -listener net.slimeslurp.growl.GrowlListner
+    * ant -listener net.slimeslurp.growl.GrowlListener
     * You could also add "-listener net.slimeslurp.growl.GrowlListener" to your ANT_OPTS environment variable
   * If you set a property called {{{ gbl.endsticky }}} in your build file, the Build Finished notification will be "sticky"
 
