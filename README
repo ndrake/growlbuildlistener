@@ -1,10 +1,8 @@
-#summary How to use
-
-= Introduction =
+# Introduction #
 
 This package contains a custom BuildListener and Task that display messages via Growl/JGrowl.
 
-= Prerequisites = 
+# Prerequisites #
 
   * The growllistener jar
   * The JGrowl jar (binaryblizzard.jar)
@@ -12,9 +10,9 @@ This package contains a custom BuildListener and Task that display messages via 
   * Growl (Mac OS X only) (http://growl.info)
 
 
-= Details =
+# Details #
 
-== Setting things up in Mac OS with Growl ==
+## Setting things up in Mac OS with Growl ##
 
   * Make sure the following settings are enabled in Growl's Network preferences:
     * "Listen for incoming notifications"
@@ -22,31 +20,31 @@ This package contains a custom BuildListener and Task that display messages via 
   * Put growllistener.jar into Ant's lib directory
   * Put binaryblizzard.jar (From JGrowl) into Ant's lib directory
     
-== Setting things up in Linux with JGrowl ==
+## Setting things up in Linux with JGrowl ##
 
   * Startup JGrowl
   * Put growllistener.jar into Ant's lib directory
   * Put binaryblizzard.jar (From JGrowl) into Ant's lib directory
 
 
-== Using the Growl BuildListener ==
+## Using the Growl BuildListener ##
 
   * To make ant use the new listener, invoke ant like this:
     * ant -listener net.slimeslurp.growl.GrowlListener
     * You could also add "-listener net.slimeslurp.growl.GrowlListener" to your ANT_OPTS environment variable
   * If you set a property called {{{ gbl.endsticky }}} in your build file, the Build Finished notification will be "sticky"
 
-== Using the GrowlEcho task ==
+## Using the GrowlEcho task ##
 
   * Add a taskdef to your build like this:
 
-    {{{ <taskdef name="growl" classname="net.slimeslurp.growl.GrowlEcho"/> }}}
+    <taskdef name="growl" classname="net.slimeslurp.growl.GrowlEcho"/>
 
   * Use the task like this:
-    {{{ <growl message="The message"/> }}}
+    <growl message="The message"/>
 
   * GrowlEcho now support accepts a sticky attribute which, when set, will cause the notification to be "sticky"
   
-== Changing the growl host ==
+## Changing the growl host ##
 
 By default, growl messages are sent to localhost.  You can tweak this by adding "-Dgbl.host=<some_ip>" to your ANT_OPTS environment variable.  You can also specify the growl password via ANT_OPTS using the gbl.passwd property.
