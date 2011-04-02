@@ -6,8 +6,8 @@ This package contains a custom BuildListener and Task that display messages via 
 
   * The growllistener jar
   * The JGrowl jar (binaryblizzard.jar)
-  * JGrowl (Linux) (http://homepage.mac.com/stevevm/JGrowl/JGrowl.tar.gz)
-  * Growl (Mac OS X only) (http://growl.info)
+  * JGrowl (Linux) http://homepage.mac.com/stevevm/JGrowl/JGrowl.tar.gz
+  * Growl (Mac OS X only) http://growl.info
 
 
 # Details #
