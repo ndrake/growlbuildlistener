@@ -16,15 +16,20 @@
 
 package net.slimeslurp.growl;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.util.Hashtable;
 
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.BuildEvent;
 
-import com.binaryblizzard.growl.Growl;
-import com.binaryblizzard.growl.GrowlException;
-import com.binaryblizzard.growl.GrowlNotification;
-import com.binaryblizzard.growl.GrowlRegistrations;
+import com.google.code.jgntp.GntpApplicationInfo;
+import com.google.code.jgntp.GntpClient;
+import com.google.code.jgntp.Gntp;
+import com.google.code.jgntp.GntpListener;
+import com.google.code.jgntp.GntpNotification;
+import com.google.code.jgntp.GntpErrorStatus;
+import com.google.code.jgntp.GntpNotificationInfo;
 
 /**
  * BuildListener that displays information on the current build
@@ -39,35 +44,33 @@ import com.binaryblizzard.growl.GrowlRegistrations;
  */
 public class GrowlListener implements BuildListener {
 
+
     private static final String APP_NAME = "Ant";
     private static final String DEFAULT_GROWL_HOST = "localhost";
     private static final String DEFAULT_GROWL_PASSWD = null;
-    private Growl growl;
+    private static final int DEFAULT_GROWL_PORT = 23053;
 
     private static final String FINISHED_STICKY_NAME = "gbl.endsticky";
     private static final String GROWL_HOST_PROP = "gbl.host";
     private static final String GROWL_PASSWD_PROP = "gbl.passwd";    
+    private static final String GROWL_PORT_PROP = "gbl.port";        
     private String growlHost;
     private String growlPasswd;
+    private int growlPort;
     
     public GrowlListener() {
-        try {
 
-            // Have to get these from the system properties as the build properties aren't  
-            // available in buildStarted()
-            //
-            // These must be set via the ANT_OPTS env variable       
-            growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
-            growlPasswd= System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
+        // Have to get these from the system properties as the build properties aren't  
+        // available in buildStarted()
+        //
+        // These must be set via the ANT_OPTS env variable       
+        growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
+        growlPasswd = System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
+        String p = System.getProperty(GROWL_PORT_PROP, ""+DEFAULT_GROWL_PORT);
+        growlPort = Integer.valueOf(p);
         
-            // Register with Growl/JGrowl
-            growl = new Growl();
-            growl.addGrowlHost(growlHost, growlPasswd);
-            GrowlRegistrations registrations = growl.getRegistrations(APP_NAME);
-            registrations.registerNotification(APP_NAME, true);
-        } catch(GrowlException e) {
-            e.printStackTrace();
-        }
+        System.out.println("new listener!");
+        
     }
 
     /**
@@ -77,7 +80,7 @@ public class GrowlListener implements BuildListener {
      */
     public void buildStarted(BuildEvent event) {        
         sendMessage("Build starting...",
-                    GrowlNotification.NORMAL, false);
+                    0, false);
     }
 
     /**
@@ -98,11 +101,17 @@ public class GrowlListener implements BuildListener {
 
         if (t != null) {
             sendMessage("Build failed: " + t.toString(), 
-                        GrowlNotification.HIGH, sticky);
+                        2, sticky);
             return;
         }
         sendMessage("Build finished for " + projectName, 
-                    GrowlNotification.NORMAL, sticky);
+                    0, sticky);
+                    
+        try {
+            Thread.sleep(1500);
+        }catch(InterruptedException e) {
+            
+        }
     }
 
     // Other messages are currently ignored
@@ -120,21 +129,87 @@ public class GrowlListener implements BuildListener {
      * @param priority The message priority
      * @param sticky If true, notification should be "sticky"
      */
-    protected void sendMessage(String msg, int priority, boolean sticky) {
-        try {
-            growl.sendNotification(new GrowlNotification(APP_NAME, 
-                                                         APP_NAME, 
-                                                         msg, 
-                                                         APP_NAME, 
-                                                         sticky, 
-                                                         priority));
-        } catch(GrowlException e) {
-            e.printStackTrace();
+    protected void sendMessage(final String msg, int priority, boolean sticky) {
+        GntpApplicationInfo info = Gntp.appInfo(APP_NAME).build(); //.icon(getImage(APPLICATION_ICON)).build();
+        final GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").build();
+        
+        final GntpClient client = Gntp.client(info).listener(new GntpListener() {
+            
+            @Override
+            public void onRegistrationSuccess() {
+                    System.out.println("Registered");
+            }
+
+
+            @Override
+            public void onNotificationSuccess(GntpNotification notification) {
+                    System.out.println("Notification success: " + notification);
+            }
+
+            @Override
+            public void onClickCallback(GntpNotification notification) {
+                    System.out.println("Click callback: " + notification.getContext());
+            }
+
+            @Override
+            public void onCloseCallback(GntpNotification notification) {
+                    System.out.println("Close callback: " + notification.getContext());
+            }
+
+            @Override
+            public void onTimeoutCallback(GntpNotification notification) {
+                    System.out.println("Timeout callback: " + notification.getContext());
+            }
+
+            @Override
+            public void onRegistrationError(GntpErrorStatus status, String description) {
+                    System.out.println("Registration Error: " + status + " - desc: " + description);
+            }
+
+            @Override
+            public void onNotificationError(GntpNotification notification, GntpErrorStatus status, String description) {
+                    System.out.println("Notification Error: " + status + " - desc: " + description);
+            }
+
+            @Override
+            public void onCommunicationError(Throwable t) {
+                t.printStackTrace();
+            }
+            
+            
+        }).forHost(growlHost).onPort(growlPort).withoutRetry().build();
+        
+        client.register();
+        
+        try { 
+
+            client.waitRegistration(5, SECONDS);
+
+            System.out.println("Notifying: " + msg);
+            client.notify(Gntp.notification(notif1, APP_NAME)
+                              .text(msg)
+                              .withoutCallback()
+                              //.header(APP_NAME)
+                              .build(), 15, SECONDS);
+
+
+            client.shutdown(5, SECONDS);
+            
+            
+        } catch(InterruptedException ie) {
+
+            System.err.println("InterruptedException :(");
         }
+
+
+
     }
+    
 
     public static void main(String[] args) {
         GrowlListener gl = new GrowlListener();
-        gl.sendMessage("Testing Testing", GrowlNotification.NORMAL, false);
+        gl.sendMessage("Testing Testing", 0, false);
     }
+    
+
 }

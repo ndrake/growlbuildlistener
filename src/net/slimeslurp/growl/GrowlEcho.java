@@ -20,14 +20,19 @@
 
 package net.slimeslurp.growl;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
-import com.binaryblizzard.growl.Growl;
-import com.binaryblizzard.growl.GrowlException;
-import com.binaryblizzard.growl.GrowlNotification;
-import com.binaryblizzard.growl.GrowlRegistrations;
+import com.google.code.jgntp.GntpApplicationInfo;
+import com.google.code.jgntp.GntpClient;
+import com.google.code.jgntp.Gntp;
+import com.google.code.jgntp.GntpListener;
+import com.google.code.jgntp.GntpNotification;
+import com.google.code.jgntp.GntpErrorStatus;
+import com.google.code.jgntp.GntpNotificationInfo;
 
 
 /**
@@ -42,12 +47,10 @@ public class GrowlEcho extends Task {
     private static final String DEFAULT_GROWL_HOST = "localhost";
     private static final String DEFAULT_GROWL_PASSWD = null;
     
-    private Growl growl;
-
     /** The message to display */
     protected String message = "";
 
-    /** Indicates if the notification should be "sticky" */
+    /** Indicates if the notification should be 'sticky" */
     protected boolean sticky = false;
     
     /** Name of system property */
@@ -63,24 +66,15 @@ public class GrowlEcho extends Task {
     private String growlPasswd;
     
     public GrowlEcho() {
-        try {
-
-            // Have to get these from the system properties as the build properties aren't  
-            // available in buildStarted()
-            //
-            // These must be set via the ANT_OPTS env variable       
-            growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
-            growlPasswd = System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
-
-            // Register with Growl/JGrowl
-            growl = new Growl();
-
-            growl.addGrowlHost(growlHost, growlPasswd);
-            GrowlRegistrations registrations = growl.getRegistrations(APP_NAME);
-            registrations.registerNotification(APP_NAME, true);
-        } catch(GrowlException e) {
-            e.printStackTrace();
-        }
+        System.out.println("HELLO!!!");
+        // Have to get these from the system properties as the build properties aren't  
+        // available in buildStarted()
+        //
+        // These must be set via the ANT_OPTS env variable       
+        growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
+        growlPasswd = System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
+        
+        System.out.println("HOST: " + growlHost);
 
     }
 
@@ -90,17 +84,69 @@ public class GrowlEcho extends Task {
      * @exception BuildException if something goes wrong with the build
      */
     public void execute() throws BuildException {
+        
+        GntpApplicationInfo info = Gntp.appInfo(APP_NAME).build(); //.icon(getImage(APPLICATION_ICON)).build();
+        GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").build();
+        
+        GntpClient client = Gntp.client(info).listener(new GntpListener() {
+                @Override
+                public void onRegistrationSuccess() {
+                        System.out.println("Registered");
+                }
 
-        try {
-            growl.sendNotification(new GrowlNotification(APP_NAME, 
-                                                         APP_NAME, 
-                                                         message, 
-                                                         APP_NAME, 
-                                                         sticky, 
-                                                         GrowlNotification.NORMAL));
-        } catch(GrowlException e) {
-            
+                @Override
+                public void onNotificationSuccess(GntpNotification notification) {
+                        System.out.println("Notification success: " + notification);
+                }
+
+                @Override
+                public void onClickCallback(GntpNotification notification) {
+                        System.out.println("Click callback: " + notification.getContext());
+                }
+
+                @Override
+                public void onCloseCallback(GntpNotification notification) {
+                        System.out.println("Close callback: " + notification.getContext());
+                }
+
+                @Override
+                public void onTimeoutCallback(GntpNotification notification) {
+                        System.out.println("Timeout callback: " + notification.getContext());
+                }
+
+                @Override
+                public void onRegistrationError(GntpErrorStatus status, String description) {
+                        System.out.println("Registration Error: " + status + " - desc: " + description);
+                }
+
+                @Override
+                public void onNotificationError(GntpNotification notification, GntpErrorStatus status, String description) {
+                        System.out.println("Notification Error: " + status + " - desc: " + description);
+                }
+
+                @Override
+                public void onCommunicationError(Throwable t) {
+                    t.printStackTrace();
+                }
+        }).build();
+
+        
+        client.register();
+        
+        try { 
+            System.err.println("Notifying: " + message);
+            client.notify(Gntp.notification(notif1, APP_NAME)
+                              .text(message)
+                              .withCallback()
+                              //.header(APP_NAME)
+                              .build(), 5, SECONDS);
+        
+        
+            client.shutdown(5, SECONDS);
+        } catch(InterruptedException ie) {
+            System.err.println("InterruptedException :(");
         }
+
 
     }
 

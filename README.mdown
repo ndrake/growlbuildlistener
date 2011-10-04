@@ -1,13 +1,12 @@
 # Introduction #
 
-This package contains a custom BuildListener and Task that display messages via Growl/JGrowl.
+This package contains a custom BuildListener and Task that display messages via Growl.
 
 # Prerequisites #
 
   * The growllistener jar
-  * The JGrowl jar (binaryblizzard.jar)
-  * JGrowl (Linux) http://homepage.mac.com/stevevm/JGrowl/JGrowl.tar.gz
-  * Growl (Mac OS X only) http://growl.info
+  * gjntp http://code.google.com/p/jgntp/
+  * Growl 1.3 (Mac OS X only) http://growl.info
 
 
 # Details #
@@ -17,16 +16,7 @@ This package contains a custom BuildListener and Task that display messages via 
   * Make sure the following settings are enabled in Growl's Network preferences:
     * "Listen for incoming notifications"
     * "Allow remote application registration"
-  * Put growllistener.jar into Ant's lib directory
-  * Put binaryblizzard.jar (From JGrowl) into Ant's lib directory
     
-## Setting things up in Linux with JGrowl ##
-
-  * Startup JGrowl
-  * Put growllistener.jar into Ant's lib directory
-  * Put binaryblizzard.jar (From JGrowl) into Ant's lib directory
-
-
 ## Using the Growl BuildListener ##
 
   * To make ant use the new listener, invoke ant like this:
