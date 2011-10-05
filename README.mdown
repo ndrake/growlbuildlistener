@@ -15,13 +15,13 @@ This package contains a custom BuildListener and Task that display messages via 
 
   * Make sure the following settings are enabled in Growl's Network preferences:
     * "Listen for incoming notifications"
-    * "Allow remote application registration"
+  * You need to add the following jars to $ANT_HOME/lib: growllistener.jar, log4j-1.2.15.jar, slf4j-api-1.6.2.jar, slf4j-log4j12-1.6.2.jar, netty-3.2.5.Final.jar, jgntp-1.2.2-SNAPSHOT.jar, guava-10.jar
     
 ## Using the Growl BuildListener ##
 
   * To make ant use the new listener, invoke ant like this:
     * ant -listener net.slimeslurp.growl.GrowlListener
-    * You could also add "-listener net.slimeslurp.growl.GrowlListener" to your ANT_OPTS environment variable
+    * You could also add "-listener net.slimeslurp.growl.GrowlListener" to your ANT_ARGS environment variable
   * If you set a property called {{{ gbl.endsticky }}} in your build file, the Build Finished notification will be "sticky"
 
 ## Using the GrowlEcho task ##
