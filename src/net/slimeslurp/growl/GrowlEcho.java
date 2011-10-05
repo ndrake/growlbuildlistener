@@ -20,19 +20,19 @@
 
 package net.slimeslurp.growl;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
-import com.google.code.jgntp.GntpApplicationInfo;
-import com.google.code.jgntp.GntpClient;
-import com.google.code.jgntp.Gntp;
-import com.google.code.jgntp.GntpListener;
-import com.google.code.jgntp.GntpNotification;
-import com.google.code.jgntp.GntpErrorStatus;
-import com.google.code.jgntp.GntpNotificationInfo;
+import net.sf.libgrowl.GrowlConnector;
+import net.sf.libgrowl.Notification;
+import net.sf.libgrowl.NotificationType;
+import net.sf.libgrowl.Application;
+
+import net.sf.libgrowl.internal.IProtocol;
+import net.sf.libgrowl.internal.Message;
+import net.sf.libgrowl.internal.NotifyMessage;
+import net.sf.libgrowl.internal.RegisterMessage;
 
 
 /**
@@ -46,6 +46,8 @@ public class GrowlEcho extends Task {
     private static final String APP_NAME = "Ant";
     private static final String DEFAULT_GROWL_HOST = "localhost";
     private static final String DEFAULT_GROWL_PASSWD = null;
+    private static final int DEFAULT_GROWL_PORT = 23053;
+    
     
     /** The message to display */
     protected String message = "";
@@ -58,6 +60,8 @@ public class GrowlEcho extends Task {
     
     /** Name of system property */
     private static final String GROWL_PASSWD_PROP = "gbl.passwd";    
+        
+    private static final String GROWL_PORT_PROP = "gbl.port";        
     
     /** The growl host to send messages to */
     private String growlHost;
@@ -65,17 +69,30 @@ public class GrowlEcho extends Task {
     /** The password for network notifications */
     private String growlPasswd;
     
+    private int growlPort;
+    
+    private GrowlConnector gConn;
+    private NotificationType[] notificationTypes;
+    private Application ant;
+    private static final NotificationType ECHO =  new NotificationType("echo");
+
+
+    
+    
     public GrowlEcho() {
-        System.out.println("HELLO!!!");
+        
         // Have to get these from the system properties as the build properties aren't  
         // available in buildStarted()
         //
         // These must be set via the ANT_OPTS env variable       
         growlHost = System.getProperty(GROWL_HOST_PROP, DEFAULT_GROWL_HOST);
         growlPasswd = System.getProperty(GROWL_PASSWD_PROP, DEFAULT_GROWL_PASSWD);
+        String p = System.getProperty(GROWL_PORT_PROP, ""+DEFAULT_GROWL_PORT);
+        growlPort = Integer.valueOf(p);
         
-        System.out.println("HOST: " + growlHost);
-
+        ant = new Application("Ant");
+        notificationTypes = new NotificationType[] { ECHO };        
+        
     }
 
     /**
@@ -85,68 +102,14 @@ public class GrowlEcho extends Task {
      */
     public void execute() throws BuildException {
         
-        GntpApplicationInfo info = Gntp.appInfo(APP_NAME).build(); //.icon(getImage(APPLICATION_ICON)).build();
-        GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").build();
         
-        GntpClient client = Gntp.client(info).listener(new GntpListener() {
-                @Override
-                public void onRegistrationSuccess() {
-                        System.out.println("Registered");
-                }
+        Notification n = new Notification(ant, ECHO, APP_NAME, message); 
+        if(sticky) n.setSticky(true);
 
-                @Override
-                public void onNotificationSuccess(GntpNotification notification) {
-                        System.out.println("Notification success: " + notification);
-                }
+        GrowlConnector gConn = new GrowlConnector(growlHost, growlPort);        
+        gConn.register(ant, notificationTypes);
 
-                @Override
-                public void onClickCallback(GntpNotification notification) {
-                        System.out.println("Click callback: " + notification.getContext());
-                }
-
-                @Override
-                public void onCloseCallback(GntpNotification notification) {
-                        System.out.println("Close callback: " + notification.getContext());
-                }
-
-                @Override
-                public void onTimeoutCallback(GntpNotification notification) {
-                        System.out.println("Timeout callback: " + notification.getContext());
-                }
-
-                @Override
-                public void onRegistrationError(GntpErrorStatus status, String description) {
-                        System.out.println("Registration Error: " + status + " - desc: " + description);
-                }
-
-                @Override
-                public void onNotificationError(GntpNotification notification, GntpErrorStatus status, String description) {
-                        System.out.println("Notification Error: " + status + " - desc: " + description);
-                }
-
-                @Override
-                public void onCommunicationError(Throwable t) {
-                    t.printStackTrace();
-                }
-        }).build();
-
-        
-        client.register();
-        
-        try { 
-            System.err.println("Notifying: " + message);
-            client.notify(Gntp.notification(notif1, APP_NAME)
-                              .text(message)
-                              .withCallback()
-                              //.header(APP_NAME)
-                              .build(), 5, SECONDS);
-        
-        
-            client.shutdown(5, SECONDS);
-        } catch(InterruptedException ie) {
-            System.err.println("InterruptedException :(");
-        }
-
+        gConn.notify(n);
 
     }
 
