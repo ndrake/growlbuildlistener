@@ -16,8 +16,6 @@
 
 package net.slimeslurp.growl;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import java.util.Hashtable;
 
 import org.apache.tools.ant.BuildListener;
