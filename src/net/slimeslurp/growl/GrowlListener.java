@@ -23,13 +23,15 @@ import java.util.Hashtable;
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.BuildEvent;
 
-import com.google.code.jgntp.GntpApplicationInfo;
-import com.google.code.jgntp.GntpClient;
-import com.google.code.jgntp.Gntp;
-import com.google.code.jgntp.GntpListener;
-import com.google.code.jgntp.GntpNotification;
-import com.google.code.jgntp.GntpErrorStatus;
-import com.google.code.jgntp.GntpNotificationInfo;
+import net.sf.libgrowl.GrowlConnector;
+import net.sf.libgrowl.Notification;
+import net.sf.libgrowl.NotificationType;
+import net.sf.libgrowl.Application;
+
+import net.sf.libgrowl.internal.IProtocol;
+import net.sf.libgrowl.internal.Message;
+import net.sf.libgrowl.internal.NotifyMessage;
+import net.sf.libgrowl.internal.RegisterMessage;
 
 /**
  * BuildListener that displays information on the current build
@@ -58,6 +60,13 @@ public class GrowlListener implements BuildListener {
     private String growlPasswd;
     private int growlPort;
     
+    private GrowlConnector gConn;
+    private NotificationType[] notificationTypes;
+    private Application ant;
+    private static final NotificationType BUILD_STARTED =  new NotificationType("Build started");
+    private static final NotificationType BUILD_FINISHED =  new NotificationType("Build finished");    
+    private static final NotificationType BUILD_FAILED =  new NotificationType("Build failed");        
+    
     public GrowlListener() {
 
         // Have to get these from the system properties as the build properties aren't  
@@ -69,8 +78,10 @@ public class GrowlListener implements BuildListener {
         String p = System.getProperty(GROWL_PORT_PROP, ""+DEFAULT_GROWL_PORT);
         growlPort = Integer.valueOf(p);
         
-        System.out.println("new listener!");
         
+        ant = new Application("Ant");
+        notificationTypes = new NotificationType[] { BUILD_STARTED, BUILD_FINISHED, BUILD_FAILED };        
+
     }
 
     /**
@@ -79,7 +90,7 @@ public class GrowlListener implements BuildListener {
      * @param event
      */
     public void buildStarted(BuildEvent event) {        
-        sendMessage("Build starting...",
+        sendMessage(BUILD_STARTED, "Build starting...", "Build Started",
                     0, false);
     }
 
@@ -100,18 +111,13 @@ public class GrowlListener implements BuildListener {
         } 
 
         if (t != null) {
-            sendMessage("Build failed: " + t.toString(), 
+            sendMessage(BUILD_FAILED, "Build failed: " + t.toString(), "Build failed",
                         2, sticky);
             return;
         }
-        sendMessage("Build finished for " + projectName, 
+        sendMessage(BUILD_FINISHED, "Build finished for " + projectName, "Build finished",
                     0, sticky);
                     
-        try {
-            Thread.sleep(1500);
-        }catch(InterruptedException e) {
-            
-        }
     }
 
     // Other messages are currently ignored
@@ -125,90 +131,29 @@ public class GrowlListener implements BuildListener {
     /**
      * Send a message to Growl/JGrowl.
      *
+     * @param type The NotificationType
      * @param msg The message
+     * @param title The title
      * @param priority The message priority
      * @param sticky If true, notification should be "sticky"
      */
-    protected void sendMessage(final String msg, int priority, boolean sticky) {
-        GntpApplicationInfo info = Gntp.appInfo(APP_NAME).build(); //.icon(getImage(APPLICATION_ICON)).build();
-        final GntpNotificationInfo notif1 = Gntp.notificationInfo(info, "Notify 1").build();
+    protected void sendMessage(NotificationType type, String msg, String title, int priority, boolean sticky) {
         
-        final GntpClient client = Gntp.client(info).listener(new GntpListener() {
+            Notification n = new Notification(ant, type, title, msg); 
+            if(sticky) n.setSticky(true);
+            n.setPriority(priority);
             
-            @Override
-            public void onRegistrationSuccess() {
-                    System.out.println("Registered");
-            }
-
-
-            @Override
-            public void onNotificationSuccess(GntpNotification notification) {
-                    System.out.println("Notification success: " + notification);
-            }
-
-            @Override
-            public void onClickCallback(GntpNotification notification) {
-                    System.out.println("Click callback: " + notification.getContext());
-            }
-
-            @Override
-            public void onCloseCallback(GntpNotification notification) {
-                    System.out.println("Close callback: " + notification.getContext());
-            }
-
-            @Override
-            public void onTimeoutCallback(GntpNotification notification) {
-                    System.out.println("Timeout callback: " + notification.getContext());
-            }
-
-            @Override
-            public void onRegistrationError(GntpErrorStatus status, String description) {
-                    System.out.println("Registration Error: " + status + " - desc: " + description);
-            }
-
-            @Override
-            public void onNotificationError(GntpNotification notification, GntpErrorStatus status, String description) {
-                    System.out.println("Notification Error: " + status + " - desc: " + description);
-            }
-
-            @Override
-            public void onCommunicationError(Throwable t) {
-                t.printStackTrace();
-            }
+            GrowlConnector gConn = new GrowlConnector(growlHost, growlPort);        
+            gConn.register(ant, notificationTypes);
             
+            gConn.notify(n);
             
-        }).forHost(growlHost).onPort(growlPort).withoutRetry().build();
-        
-        client.register();
-        
-        try { 
-
-            client.waitRegistration(5, SECONDS);
-
-            System.out.println("Notifying: " + msg);
-            client.notify(Gntp.notification(notif1, APP_NAME)
-                              .text(msg)
-                              .withoutCallback()
-                              //.header(APP_NAME)
-                              .build(), 15, SECONDS);
-
-
-            client.shutdown(5, SECONDS);
-            
-            
-        } catch(InterruptedException ie) {
-
-            System.err.println("InterruptedException :(");
-        }
-
-
-
     }
     
 
     public static void main(String[] args) {
         GrowlListener gl = new GrowlListener();
-        gl.sendMessage("Testing Testing", 0, false);
+        gl.sendMessage(BUILD_STARTED, "Testing Testing", "Test Title", 0, false);
     }
     
 

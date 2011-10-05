@@ -5,7 +5,7 @@ This package contains a custom BuildListener and Task that display messages via 
 # Prerequisites #
 
   * The growllistener jar
-  * gjntp http://code.google.com/p/jgntp/
+  * libgrowl http://sourceforge.net/projects/libgrowl/
   * Growl 1.3 (Mac OS X only) http://growl.info
 
 
@@ -15,7 +15,8 @@ This package contains a custom BuildListener and Task that display messages via 
 
   * Make sure the following settings are enabled in Growl's Network preferences:
     * "Listen for incoming notifications"
-  * You need to add the following jars to $ANT_HOME/lib: growllistener.jar, log4j-1.2.15.jar, slf4j-api-1.6.2.jar, slf4j-log4j12-1.6.2.jar, netty-3.2.5.Final.jar, jgntp-1.2.2-SNAPSHOT.jar, guava-10.jar
+  * You need to add the following jars to $ANT_HOME/lib: growllistener.jar, libgrowl.jar
+  
     
 ## Using the Growl BuildListener ##
 
