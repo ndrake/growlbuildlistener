@@ -29,10 +29,11 @@ This package contains a custom BuildListener and Task that display messages via 
 
   * Add a taskdef to your build like this:
 
-    <taskdef name="growl" classname="net.slimeslurp.growl.GrowlEcho"/>
+      &lt;taskdef name="growl" classname="net.slimeslurp.growl.GrowlEcho"/&gt;
 
   * Use the task like this:
-    <growl message="The message"/>
+ 
+      &lt;growl message="The message"/&gt;
 
   * GrowlEcho now support accepts a sticky attribute which, when set, will cause the notification to be "sticky"
   
