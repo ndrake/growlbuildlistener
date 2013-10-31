@@ -55,4 +55,21 @@
         <growl message="sticky..." sticky="true"/>
     </target>
 
+    <target name="test.ncecho" depends="dist" description="Test GrowlEcho task">
+        <taskdef name="nc" classname="net.slimeslurp.growl.NCEcho"/>
+        <nc message="regular"/>
+        <nc message="sticky..." sticky="true"/>
+    </target>
+    
+    <target name="test.nc" depends="dist" description="Test NCListener">
+        <echo>${ANT_HOME}</echo>
+        <java classname="net.slimeslurp.growl.NCListener">
+            <classpath>
+                <path refid="compile.classpath"/>
+                <pathelement location="${ant.jar}"/>                
+                <pathelement location="${dist}/lib/growllistener.jar"/>
+            </classpath>
+        </java>
+    </target>
+
 </project>
