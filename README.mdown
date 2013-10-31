@@ -7,7 +7,9 @@ This package contains a custom BuildListener and Task that display messages via 
   * The growllistener jar
   * libgrowl http://sourceforge.net/projects/libgrowl/
   * Growl 1.3 (Mac OS X only) http://growl.info or Growl for Windows http://www.growlforwindows.com/gfw/default.aspx
-
+  OR
+  * Mac with Notification Center and terminal-notifier (https://github.com/alloy/terminal-notifier)
+  
 
 # Details #
 
