@@ -1,6 +1,6 @@
 /*
  *  Copyright 2013 Nate Drake
- * 
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
  *  this work for additional information regarding copyright ownership.
@@ -28,7 +28,7 @@ import org.apache.tools.ant.Task;
 
 /**
  * Ant Task that writes a message via Notification Center.
- * 
+ *
  * REQUIRES: terminal-notifier (https://github.com/alloy/terminal-notifier)
  *           (brew install terminal-notifier)
  *
@@ -38,38 +38,38 @@ import org.apache.tools.ant.Task;
  */
 public class NCEcho extends Task {
 
-    private static final String APP_NAME = "Ant";    
-    
+    private static final String APP_NAME = "Ant";
+
     /** The message to display */
     protected String message = "";
 
     /** Indicates if the notification should be 'sticky" */
     protected boolean sticky = false;
-    
+
     /** Name of system property */
     private static final String GROWL_HOST_PROP = "gbl.host";
-    
+
     /** Name of system property */
-    private static final String GROWL_PASSWD_PROP = "gbl.passwd";    
-        
-    private static final String GROWL_PORT_PROP = "gbl.port";        
-    
+    private static final String GROWL_PASSWD_PROP = "gbl.passwd";
+
+    private static final String GROWL_PORT_PROP = "gbl.port";
+
     /** The growl host to send messages to */
     private String growlHost;
-    
+
     /** The password for network notifications */
     private String growlPasswd;
-    
+
     private int growlPort;
-    
-    
+
+
     public NCEcho() {
-        
-        // Have to get these from the system properties as the build properties aren't  
+
+        // Have to get these from the system properties as the build properties aren't
         // available in buildStarted()
         //
-        // These must be set via the ANT_OPTS env variable       
-        
+        // These must be set via the ANT_OPTS env variable
+
     }
 
     /**
@@ -78,17 +78,17 @@ public class NCEcho extends Task {
      * @exception BuildException if something goes wrong with the build
      */
     public void execute() throws BuildException {
-        
+
         try {
             StringBuilder sb = new StringBuilder("terminal-notifier -message ");
             sb.append(message).append(" -title ").append("\ud83d\udc1c");
-            
+
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec(sb.toString());
         } catch(IOException ioe) {
             ioe.printStackTrace();
         }
-        
+
 
     }
 
@@ -120,5 +120,5 @@ public class NCEcho extends Task {
     public void setSticky(boolean sticky) {
         this.sticky = sticky;
     }
-      
+
 }

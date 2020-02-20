@@ -8,18 +8,18 @@ import java.util.HashMap;
 
 /**
  * Java version of flip.pl/flip.js
- * 
- */ 
+ *
+ */
 public class Flip {
-    
+
     // (╯°□°）╯
     public static final String guy = "(\u256F\u00B0\u25A1\u00B0\uFF09\u256F \uFE35 ";
-    
+
     static Map<Character,Character> flipTable = new HashMap<Character,Character>() {
-    {        
+    {
         put('a','\u0250');
         put('b','q');
-        put('c','\u0254'); 
+        put('c','\u0254');
         put('d','p');
         put('e','\u01DD');
         put('f','\u025F');
@@ -90,8 +90,8 @@ public class Flip {
         put('\r','\n');
         put(' ',' ');
      }};
-    
-    
+
+
      public static String flip(String src) {
          StringBuilder sb = new StringBuilder();
 
@@ -104,10 +104,10 @@ public class Flip {
                  sb.append(cf);
              }
          }
-         
+
          return sb.toString();
      }
-     
+
     public static void main(String[] args) {
         try {
             PrintStream out = new PrintStream(System.out, true, "UTF-8");
